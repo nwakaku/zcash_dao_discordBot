@@ -1,26 +1,17 @@
 {
-  "name": "discord.js-v14-v2-template",
+  "name": "zechub-vote-desk",
   "version": "1.1.1",
-  "description": "A Discord.js v14 template with v2 components",
+  "description": "Read-only DAO DAO governance vote monitoring for Discord",
   "license": "ISC",
-  "keywords": [
-    "discord.js",
-    "v14",
-    "template",
-    "v2",
-    "components",
-    "discord-hybrid-sharding",
-    "ZarScape",
-    "zar",
-    "discord-bot"
-  ],
+  "keywords": ["discord.js", "governance", "DAO DAO", "Juno", "ZecHub"],
   "main": "src/zar.js",
   "scripts": {
-    "start": "node src/zar.js"
+    "start": "node src/zar.js",
+    "test": "node --test",
+    "backtest": "node scripts/backtest.js"
   },
   "type": "commonjs",
-  "author": "ZarScape",
-  "homepage": "https://github.com/ZarScape/discord.js-v14-v2-template.git",
+  "homepage": "https://github.com/nwakaku/zcash_dao_discordBot",
   "dependencies": {
     "discord-hybrid-sharding": "^3.0.1",
     "discord.js": "^14.26.2",

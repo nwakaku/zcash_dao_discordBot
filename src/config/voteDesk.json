@@ -1,0 +1,19 @@
+{
+    "enabled": false,
+    "daoAddress": "juno1nktrulhakwm0n3wlyajpwxyg54n39xx4y8hdaqlty7mymf85vweq7m6t0y",
+    "lcdUrl": "https://juno-api.polkachu.com",
+    "daoUrl": "https://daodao.zone/dao/juno1nktrulhakwm0n3wlyajpwxyg54n39xx4y8hdaqlty7mymf85vweq7m6t0y",
+    "channelId": "",
+    "pollIntervalSeconds": 300,
+    "blockTimeSeconds": 6,
+    "reminderHours": [
+        48,
+        24
+    ],
+    "templates": {
+        "alert": "**{title}** (`{proposal}`)\nAs of {asOf} UTC — {timeRemaining} remaining.\nYes: {yes} · No: {no} · Abstain: {abstain} · Total cast: {cast}.\nQuorum: {quorumComparison}\nSupport threshold: {threshold}.\nYes votes still needed (holding current no votes): **{yesNeeded}**.\nNot yet voted: {nonVoters}\n{url}",
+        "closing": "**Vote Desk closing summary — {title}** (`{proposal}`)\nOutcome: **{outcome}**.\nQuorum: {quorumResult}; support: {supportResult}.\nMissed: {reason}. Shortfall: {shortfall}\nAs of {asOf} UTC · {url}",
+        "unavailable": "**Vote Desk: data unavailable** for `{proposal}` as of {asOf} UTC. No stale vote figures are being reported; the bot will retry.",
+        "outage": "**Vote Desk: data unavailable** as of {asOf} UTC. No stale vote figures are being reported; the bot will retry."
+    }
+}

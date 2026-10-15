@@ -14,6 +14,8 @@ module.exports = {
         console.log(`║ ${boxMessage.padEnd(maxLength - 2)} ║`);
         console.log(`╚${'─'.repeat(maxLength)}╝`);
 
+        require('../../voteDesk/monitor').startVoteDesk(client);
+
         client.user.setPresence({
             status: 'online',
             activities: [{

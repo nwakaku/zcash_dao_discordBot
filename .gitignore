@@ -6,3 +6,7 @@ node_modules/
 
 # Package lock file
 package-lock.json
+
+# Vote Desk persistent scheduler state
+data/vote-desk-state.json
+data/vote-desk-state.json.tmp

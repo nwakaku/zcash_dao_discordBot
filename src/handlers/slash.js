@@ -10,7 +10,7 @@ module.exports = async () => {
     let loadedCommands = [];
     let skippedCommands = [];
 
-    fs.readdirSync('./src/slashCommands/').forEach(dir => {
+    fs.readdirSync('./src/slashCommands/').filter(dir => dir !== 'V2 Components').forEach(dir => {
         const commands = fs.readdirSync(`./src/slashCommands/${dir}`).filter(file => file.endsWith('.js'));
 
         for (let file of commands) {

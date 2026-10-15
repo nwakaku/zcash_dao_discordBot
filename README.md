@@ -1,267 +1,44 @@
-# Discord.js v14 with V2 Components Template
+# ZecHub Vote Desk
 
-A full-featured Discord bot template built with **Discord.js v14** and the new **Components V2** system. This template demonstrates modern command and event handling, modular slash commands, media galleries, file components, and container-based layouts.
+Read-only Discord governance monitoring for the ZecHub DAO on Juno. The Vote Desk reads DAO DAO proposal, voting, and CW4 group contracts; it never casts votes or submits chain transactions.
 
-<p align="center">
-  <img src="assets/image.png" alt="Bot Template Preview">
-</p>
+## What it does
 
-# Make sure to leave a ⭐ if this helps :)
-If you notice any inconsistencies or have suggestions for improvement, please report them in the Issues tab, or feel free to submit a Pull Request if you can provide a direct fix.
----
+- Posts public updates in the configured governance channel at 48 and 24 hours before each open proposal expires.
+- Includes yes/no/abstain, total cast, snapshot voting power, the proposal-specific support threshold and quorum, the minimum additional yes votes needed at the current no count, time remaining, and a direct proposal link.
+- Includes one public list of current CW4 group members who have not voted. It sends no DMs or targeted pings.
+- Posts one closing summary for proposals the bot has observed open, with the outcome, whether support and/or quorum was missed, and the vote shortfall.
+- Refreshes data for every post. When a required chain query fails, it posts a data-unavailable notice instead of using stored vote figures.
+- Persists deduplication and proposal tracking state in `data/vote-desk-state.json`. Keep this file on persistent storage and run only one Vote Desk cluster.
 
-# Preview of V2 Components:
+The DAO core contract is configured below; the bot discovers registered proposal modules, their prefixes, the voting module, and its CW4 group at runtime. Threshold and total voting power come from each proposal's stored values, not constants. DAO DAO's proposal stores `total_power` with the proposal start-height snapshot and the threshold in effect for that proposal.
 
-<p align="center">
-<table>
-  <tr>
-    <td align="center">
-      <img src="assets/example-1.png" alt="Example 1"><br>Example 1
-    </td>
-    <td align="center">
-      <img src="assets/example-2.png" alt="Example 2"><br>Example 2
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <img src="assets/example-3.png" alt="Example 3"><br>Example 3
-    </td>
-  </tr>
-</table>
-</p>
+## Setup
 
----
+1. Install dependencies with `npm install`; copy `.env.example` to `.env` and set `TOKEN` and `CLIENTID`.
+2. Create a Discord text channel for governance messages and give the bot permission to view and send messages there.
+3. Set `VOTEDESK_ENABLED=true` and `VOTEDESK_CHANNEL_ID=<channel id>` in `.env`. It is disabled by default. Set `VOTEDESK_ENABLED=false` and restart the bot to use the maintainer kill switch.
+4. Review `src/config/voteDesk.json` for the DAO, read-only LCD endpoint, poll frequency, timings, and message templates. Override the DAO/LCD or scheduler settings with the `VOTEDESK_*` variables documented in `.env.example`.
+5. Run `npm test` and `npm run backtest`, then start with `npm start`. Keep the Discord token, hosting account, channel permissions, and persistent state under DAO control.
 
-<img src="assets/example-4.png" alt="Example 4"><br>
+The non-voter list is based on the CW4 group roster filtered by each proposal's snapshot voting power, while vote math uses the proposal's stored power snapshot and current on-chain tally. The CW4 contract exposes the current roster, not a historical roster; members removed after a proposal snapshot cannot be enumerated from this contract alone. The current DAO proposals use time-based expirations. Height-based expirations are supported using the configured average block-time estimate.
 
-
-
-<p align="center">
-<table>
-  <tr>
-    <td align="center">
-      <img src="assets/example-5.png" alt="Example 5"><br>Message Command
-    </td>
-  </tr>
-</table>
-</p>
-
-
-
----
-
-## 📁 Project Structure
-
-```
-📦discord.js v14 with v2 components template
-┣ 📂assets                  # Project assets (e.g., images)
-┣ 📂data                    # Optional data storage for bot usage
-┣ 📂src
-┃ ┣ 📂config
-┃ ┃ ┗ 📜config.json         # Bot configuration (color, emojis, etc.)
-┃ ┣ 📂console
-┃ ┃ ┗ 📜watermark.js        # Optional console watermark
-┃ ┣ 📂events                # Event handlers
-┃ ┃ ┣ 📂client
-┃ ┃ ┃ ┣ 📜interactionCreate.js   # Interaction event handler
-┃ ┃ ┃ ┣ 📜messageCreate.js     # Message command handler
-┃ ┃ ┃ ┗ 📜ready.js               # Ready event handler
-┃ ┃ ┗ 📂Other               # Other custom events
-┃ ┣ 📂handlers              # Handlers for events and commands
-┃ ┃ ┣ 📜event.js               # Event loader
-┃ ┃ ┣ 📜message.js             # Message command loader
-┃ ┃ ┗ 📜slash.js               # Slash command loader
-┃ ┣ 📂messageCommands       # Message command files organized by category
-┃ ┃ ┗ 📂Info
-┃ ┃   ┗ 📜ping.js
-┃ ┣ 📂slashCommands         # Slash command files organized by category
-┃ ┃ ┣ 📂Info
-┃ ┃ ┃ ┗ 📜ping.js
-┃ ┃ ┗ 📂V2 Components
-┃ ┃   ┣ 📜button-1.js
-┃ ┃   ┣ 📜button-2.js
-┃ ┃   ┣ 📜button-3.js
-┃ ┃   ┣ 📜file-components.js
-┃ ┃   ┣ 📜media-gallery.js
-┃ ┃   ┣ 📜menu.js
-┃ ┃   ┣ 📜section.js
-┃ ┃   ┣ 📜separator.js
-┃ ┃   ┣ 📜text-display.js
-┃ ┃   ┗ 📜v2-components.js
-┃ ┣ 📂temp                 # Temporary files (e.g., generated data)
-┃ ┣ 📂utils                # Utility functions
-┃ ┃   ┗ 📜consoleStyle.js  # Console styling helper
-┃ ┣ 📜index.js
-┃ ┗ 📜zar.js
-┣ 📜.env.example            # Environment variables (TOKEN, CLIENTID)
-┗ 📜package.json
-```
-
----
-
-## ⚡ Features
-
-- Modern **slash commands** with `SlashCommandBuilder`.
-- Modern **message commands** with prefix, bot name, and mention triggers.
-- Fully modular **event handler** with max listeners support.
-- **V2 Components** support:
-  - **TextDisplay** – display static text with Markdown.
-  - **Section** – group text with thumbnails or buttons.
-  - **Button** – clickable buttons (Primary, Secondary, Link, etc.).
-  - **MediaGallery** – carousel of images/videos.
-  - **FileBuilder / AttachmentBuilder** – send JSON or files.
-  - **Separator** – divide content visually.
-  - **ChannelSelectMenu** – select a channel interactively.
-  - **ContainerBuilder** – aggregate multiple component types into a single layout.
-- Automatic slash command registration.
-- Automatic message command loading from `src/messageCommands`.
-- Dummy JSON generation for testing file components.
-- Modular slash commands, message commands, and events for easy scalability.
-- **Sharding support** for large bots to distribute load across multiple processes.
-- Console logs all loaded commands and events in a single box for clarity.
-
----
-
-## ⚙ Installation
-
-1. Clone the repository:
+## Validation
 
 ```bash
-git clone https://github.com/ZarScape/discord.js-v14-v2-template.git
-cd discord.js-v14-v2-template
-````
-
-2. Install dependencies:
-
-```bash
-npm install
+npm test
+npm run backtest
 ```
 
-3. Create a `.env` file in the root:
+The backtest compares calculated outcomes against every terminal proposal status currently returned by the DAO contracts. The PRD also references a separate 53-proposal historical file and DAO DAO UI outcomes, but that file was not present in this repository; the live-chain backtest is not a substitute for that external dataset.
 
-```env
-TOKEN=YOUR_BOT_TOKEN
-CLIENTID=YOUR_CLIENT_ID
-```
+## Architecture
 
-4. Update `src/config/config.json` for colors, emojis, or other config values.
+- `src/voteDesk/junoClient.js` performs read-only Juno LCD smart queries.
+- `src/voteDesk/daoSource.js` discovers DAO modules and paginates proposals, CW4 members, and proposal votes.
+- `src/voteDesk/math.js` implements DAO DAO percentage, majority, quorum, absolute-percentage, and absolute-count math with integer arithmetic.
+- `src/voteDesk/monitor.js` schedules channel posts, handles unavailable data, applies the kill switch, and persists deduplication.
+- `src/config/voteDesk.json` contains the DAO defaults, reminder schedule, poll frequency, and editable message templates.
+- `test/voteDesk.test.js` covers the vote calculation and formatting.
 
----
-
-## 🚀 Running the Bot
-
-Start the bot with:
-
-```bash
-npm start
-```
-
-You should see a consolidated console log with **all commands and events loaded**.
-
----
-
-## 🧩 Adding Commands
-
-### Slash Commands
-
-1. Place slash command files under `src/slashCommands/[Category]/`.
-2. Export `data` (`SlashCommandBuilder`) and `run`.
-
-### Message Commands
-
-1. Place message command files under `src/messageCommands/[Category]/`.
-2. Export `name`, optional `aliases`, and `run(client, message, args, prefix)`.
-3. Use any supported trigger:
-   - `?ping`
-   - `zar ping`
-   - `@Bot ping`
-
-### V2 Components Examples
-
-Use files in `src/slashCommands/V2 Components/` as reference:
-
-- `text-display.js`
-- `section.js`
-- `button-1.js / button-2.js / button-3.js`
-- `file-components.js`
-- `media-gallery.js`
-- `menu.js`
-- `separator.js`
-- `v2-components.js` (example using all components)
-
----
-
-## 📖 Guide for Components V2
-
-* **TextDisplay** – static text messages.
-* **Section** – text with accessories (Thumbnail, Buttons, Menus).
-* **Button** – clickable interactive buttons.
-* **MediaGallery** – carousel of images/videos.
-* **FileBuilder / AttachmentBuilder** – attach JSON or images.
-* **Separator** – add visual dividers or spacing.
-* **ChannelSelectMenu** – interactive channel selection.
-* **ContainerBuilder** – wraps multiple components into a single structured layout.
-
-All of these components are included in separate commands as examples.
-
----
-
-## 🔧 Customization
-
-* Change **accent colors** in `src/config/config.json` (`color`).
-* Configure message command triggers in `src/config/config.json`:
-  - `prefix` for prefix commands (example: `?`)
-  - `botName` for name-based commands (example: `zar`)
-* Replace **images** in `src/assets/` and update paths in commands.
-* Add your own slash commands in `src/slashCommands/` and message commands in `src/messageCommands/`.
-* Add your own **buttons, menus, or media galleries** to create unique interactions.
-
----
-
-## 📂 Folder Usage
-
-* `src/assets` – local images, dummy JSONs, or other media.
-* `src/temp` – for temporary files generated by commands.
-* `src/utils` – helper functions for reuse.
-* `src/handlers` – loaders for events, slash commands, and message commands.
-* `src/events/client` – core client events including `interactionCreate` and `messageCreate`.
-* `src/slashCommands` – slash command files organized by category.
-* `src/messageCommands` – message command files organized by category.
-
----
-
-## 📝 Notes
-
-* Ensure `MessageFlags.IsComponentsV2` is set when sending V2 components.
-* Slash commands are automatically registered at app start.
-* Message commands are automatically loaded at app start.
-* Message commands can be triggered using `prefix`, `botName`, or bot mention.
-* Ensure `prefix` and `botName` are set in `src/config/config.json` for message command routing.
-* All console output for commands/events is consolidated in one box for readability.
-
----
-
-## ⚖ License
-
-ISC License – free to use and modify for personal or commercial projects.
-
----
-
-## Runtime Notes
-
-* Console styling now uses Node's native `util.styleText`
-* The startup logging helper lives in `src/utils/consoleStyle.js`.
-
----
-
-## Changelog
-
-Recent updates are tracked in:
-
-- [CHANGELOG.md](CHANGELOG.md)
-
----
-
-## 📞 Support
-
-Join the [Zar HQ Discord](https://discord.gg/6YVmxA4Qsf) for help, updates, and discussion.
+The original Discord.js event and command loader remains under `src/`. Its V2 component showcase commands are retained as examples but excluded from slash-command registration.
