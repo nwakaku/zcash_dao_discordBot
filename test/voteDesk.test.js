@@ -5,9 +5,10 @@ const os = require('node:os');
 const path = require('node:path');
 const { calculateVoteMath } = require('../src/voteDesk/math');
 const { formatDuration, shortAddress } = require('../src/voteDesk/format');
-const { runCycle } = require('../src/voteDesk/monitor');
+const { runCycle, runManualPost } = require('../src/voteDesk/monitor');
 const { listSnapshotNonVoters } = require('../src/voteDesk/daoSource');
 const { StateStore } = require('../src/voteDesk/stateStore');
+const { TargetStore } = require('../src/voteDesk/targetStore');
 
 const threshold = {
     threshold_quorum: {
@@ -140,7 +141,7 @@ test('publishes one public reminder and a closing summary without replaying arch
         daoAddress: 'dao',
         daoUrl: 'https://daodao.zone/dao/dao',
         blockTimeSeconds: 6,
-        reminderHours: [48, 24],
+        reminderHours: [10000, 5000],
         templates: {
             alert: 'Alert {proposal}: {yesNeeded} needed. Not voted: {nonVoters} ({quorumComparison})',
             closing: 'Closing {proposal}: {outcome}; {shortfall}',
@@ -160,4 +161,159 @@ test('publishes one public reminder and a closing summary without replaying arch
     await runCycle(undefined, channel, config, chain, state);
     assert.equal(channelMessages.length, 2);
     assert.match(channelMessages[1].content, /Closing A1: Passed/);
+});
+
+test('manually posts an alert outside the reminder window without touching state', async t => {
+    const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'vote-desk-manual-'));
+    t.after(() => fs.rm(directory, { recursive: true, force: true }));
+    const state = await new StateStore(path.join(directory, 'state.json')).load();
+    const now = new Date();
+    const member = 'juno13hpzs4dk6wcufqpa4nkk47yv28hkfdxq86shj8';
+    const chain = {
+        async latestBlock() {
+            return { height: 100n, time: now };
+        },
+        async queryContract(address, query) {
+            if (address === 'dao' && query.proposal_modules) {
+                return [{ address: 'proposal', prefix: 'A', status: 'enabled' }];
+            }
+            if (address === 'dao' && query.voting_module) return 'voting';
+            if (address === 'voting' && query.group_contract) return 'group';
+            if (address === 'voting' && query.voting_power_at_height) return { power: '1' };
+            if (address === 'group' && query.list_members) return { members: [{ addr: member, weight: 1 }] };
+            if (address === 'proposal' && query.reverse_proposals) {
+                return {
+                    proposals: [{
+                        id: 1,
+                        proposal: {
+                            title: 'Sample proposal',
+                            status: 'open',
+                            expiration: { at_time: String(BigInt(now.getTime() + 1000 * 3600_000) * 1_000_000n) },
+                            threshold,
+                            total_power: '2',
+                            start_height: 90,
+                            votes: { yes: '0', no: '0', abstain: '0' },
+                        },
+                    }],
+                };
+            }
+            if (address === 'proposal' && query.list_votes) return { votes: [] };
+            throw new Error(`Unexpected mock query: ${address}`);
+        },
+    };
+    const channelMessages = [];
+    const channel = {
+        async send(message) {
+            channelMessages.push(message);
+        },
+    };
+    const config = {
+        daoAddress: 'dao',
+        daoUrl: 'https://daodao.zone/dao/dao',
+        blockTimeSeconds: 6,
+        reminderHours: [1],
+        templates: {
+            alert: 'Alert {proposal}: {yesNeeded} needed. Not voted: {nonVoters}',
+            closing: 'Closing {proposal}: {outcome}',
+            unavailable: 'Data unavailable for {proposal}',
+            outage: 'DAO data unavailable',
+        },
+    };
+
+    const result = await runManualPost(channel, config, chain, {});
+    assert.equal(result.posted, 1);
+    assert.deepEqual(result.proposals, ['A1']);
+    assert.equal(channelMessages.length, 1);
+    assert.match(channelMessages[0].content, /A1/);
+    assert.deepEqual(state.data.posts, {});
+});
+
+test('target store round-trips per-guild channel mappings', async t => {
+    const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'vote-desk-targets-'));
+    t.after(() => fs.rm(directory, { recursive: true, force: true }));
+    const file = path.join(directory, 'targets.json');
+
+    const store = await new TargetStore(file).load();
+    assert.equal(store.get('guild-a'), null);
+
+    await store.set('guild-a', 'channel-1');
+    await store.set('guild-b', 'channel-2');
+    assert.equal(store.get('guild-a'), 'channel-1');
+    assert.deepEqual(store.all(), { 'guild-a': 'channel-1', 'guild-b': 'channel-2' });
+
+    const reloaded = await new TargetStore(file).load();
+    assert.equal(reloaded.get('guild-b'), 'channel-2');
+
+    await reloaded.clear('guild-a');
+    assert.equal(reloaded.get('guild-a'), null);
+    const afterClear = await new TargetStore(file).load();
+    assert.deepEqual(afterClear.all(), { 'guild-b': 'channel-2' });
+});
+
+test('deduplicates reminders independently per target scope', async t => {
+    const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'vote-desk-scope-'));
+    t.after(() => fs.rm(directory, { recursive: true, force: true }));
+    const state = await new StateStore(path.join(directory, 'state.json')).load();
+    const now = new Date();
+    const member = 'juno13hpzs4dk6wcufqpa4nkk47yv28hkfdxq86shj8';
+    const chain = {
+        async latestBlock() {
+            return { height: 100n, time: now };
+        },
+        async queryContract(address, query) {
+            if (address === 'dao' && query.proposal_modules) {
+                return [{ address: 'proposal', prefix: 'A', status: 'enabled' }];
+            }
+            if (address === 'dao' && query.voting_module) return 'voting';
+            if (address === 'voting' && query.group_contract) return 'group';
+            if (address === 'voting' && query.voting_power_at_height) return { power: '1' };
+            if (address === 'group' && query.list_members) return { members: [{ addr: member, weight: 1 }] };
+            if (address === 'proposal' && query.reverse_proposals) {
+                return {
+                    proposals: [{
+                        id: 1,
+                        proposal: {
+                            title: 'Sample proposal',
+                            status: 'open',
+                            expiration: { at_time: String(BigInt(now.getTime() + 47 * 3600_000) * 1_000_000n) },
+                            threshold,
+                            total_power: '2',
+                            start_height: 90,
+                            votes: { yes: '0', no: '0', abstain: '0' },
+                        },
+                    }],
+                };
+            }
+            if (address === 'proposal' && query.list_votes) return { votes: [] };
+            throw new Error(`Unexpected mock query: ${address}`);
+        },
+    };
+    const channelMessages = [];
+    const channel = {
+        async send(message) {
+            channelMessages.push(message);
+        },
+    };
+    const config = {
+        daoAddress: 'dao',
+        daoUrl: 'https://daodao.zone/dao/dao',
+        blockTimeSeconds: 6,
+        reminderHours: [48],
+        templates: {
+            alert: 'Alert {proposal}: {yesNeeded} needed. Not voted: {nonVoters}',
+            closing: 'Closing {proposal}: {outcome}',
+            unavailable: 'Data unavailable for {proposal}',
+            outage: 'DAO data unavailable',
+        },
+    };
+
+    await runCycle(undefined, channel, config, chain, state, 'guild-a');
+    await runCycle(undefined, channel, config, chain, state, 'guild-a');
+    assert.equal(channelMessages.length, 1);
+
+    await runCycle(undefined, channel, config, chain, state, 'guild-b');
+    assert.equal(channelMessages.length, 2);
+
+    assert.equal(state.has('guild-a:proposal:1:48h'), true);
+    assert.equal(state.has('guild-b:proposal:1:48h'), true);
 });

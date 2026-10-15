@@ -10,3 +10,5 @@ package-lock.json
 # Vote Desk persistent scheduler state
 data/vote-desk-state.json
 data/vote-desk-state.json.tmp
+data/vote-desk-targets.json
+data/vote-desk-targets.json.tmp

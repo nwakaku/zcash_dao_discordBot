@@ -16,6 +16,15 @@ module.exports = {
 
         require('../../voteDesk/monitor').startVoteDesk(client);
 
+        (async () => {
+            const guildIds = [...client.guilds.cache.keys()];
+            let registered = 0;
+            for (const guildId of guildIds) {
+                if (await client.registerGuildCommands(guildId)) registered += 1;
+            }
+            console.log(`[COMMANDS] Registered guild commands in ${registered}/${guildIds.length} guild(s).`);
+        })().catch(error => console.error('[COMMANDS] Guild registration failed:', error));
+
         client.user.setPresence({
             status: 'online',
             activities: [{

@@ -3,17 +3,116 @@
     "daoAddress": "juno1nktrulhakwm0n3wlyajpwxyg54n39xx4y8hdaqlty7mymf85vweq7m6t0y",
     "lcdUrl": "https://juno-api.polkachu.com",
     "daoUrl": "https://daodao.zone/dao/juno1nktrulhakwm0n3wlyajpwxyg54n39xx4y8hdaqlty7mymf85vweq7m6t0y",
-    "channelId": "",
     "pollIntervalSeconds": 300,
     "blockTimeSeconds": 6,
     "reminderHours": [
         48,
         24
     ],
-    "templates": {
-        "alert": "**{title}** (`{proposal}`)\nAs of {asOf} UTC — {timeRemaining} remaining.\nYes: {yes} · No: {no} · Abstain: {abstain} · Total cast: {cast}.\nQuorum: {quorumComparison}\nSupport threshold: {threshold}.\nYes votes still needed (holding current no votes): **{yesNeeded}**.\nNot yet voted: {nonVoters}\n{url}",
-        "closing": "**Vote Desk closing summary — {title}** (`{proposal}`)\nOutcome: **{outcome}**.\nQuorum: {quorumResult}; support: {supportResult}.\nMissed: {reason}. Shortfall: {shortfall}\nAs of {asOf} UTC · {url}",
-        "unavailable": "**Vote Desk: data unavailable** for `{proposal}` as of {asOf} UTC. No stale vote figures are being reported; the bot will retry.",
-        "outage": "**Vote Desk: data unavailable** as of {asOf} UTC. No stale vote figures are being reported; the bot will retry."
+    
+  "templates": {
+    "alert": "🗳️ **{title}** (`{proposal}`)\n\n⏳ **Voting closes in {timeRemaining}**\n\n**Current votes**\n👍 Yes: {yes} · 👎 No: {no} · ➖ Abstain: {abstain}\n\n**What's needed?**\nVotes counted: {quorumComparison}\nSupport required: {threshold}\nMore Yes votes needed: **{yesNeeded}**\n\n**Members yet to vote:**\n{nonVoters}\n\n👉 **View proposal and vote:** www.proposallink",
+
+    "closing": "📋 **Voting Closed — {title}** (`{proposal}`)\n\n**Outcome:** {outcome}\n\n**Final check**\nMinimum votes required: {quorumResult}\nSupport required: {supportResult}\n\n**What happened?**\n{reason}\nShortfall: {shortfall}\n\n🕒 Last updated: {asOf} UTC\n👉 **View proposal: ** <{url}>",
+
+    "unavailable": "⚠️ **Vote Desk: Data Unavailable**\n\nWe couldn't retrieve the latest voting information for `{proposal}`.\n\nNo outdated vote figures are being shown. The bot will try again shortly.\n\n🕒 Last checked: {asOf} UTC",
+
+    "outage": "⚠️ **Vote Desk: Temporarily Unavailable**\n\nWe couldn't retrieve the latest voting information. No outdated vote figures are being shown.\n\nThe bot will try again shortly.\n\n🕒 Last checked: {asOf} UTC"
+  },
+
+    "pfpkApiUrl": "https://pfpk.daodao.zone",
+    "members": {
+        "juno13hpzs4dk6wcufqpa4nkk47yv28hkfdxq86shj8": {
+            "name": "zerodartz",
+            "discordId": ""
+        },
+        "juno13vk23rl6hmswvwexd9f5ae59egtqy2p7xluev4": {
+            "name": "lowothe13th",
+            "discordId": ""
+        },
+        "juno14cg9569rhe0x6avxkpdnrafvjy7zmnv2s6aaqp": {
+            "name": "1337bytes",
+            "discordId": ""
+        },
+        "juno154xpy7ge2nmqft7n8dfhgmquyqhsfgm3w78qzg": {
+            "name": "speedfox9936",
+            "discordId": ""
+        },
+        "juno169hpcstyc9qal5t2hu2y6xlqjjvc303ca8dvpv": {
+            "name": "aquietinvestor",
+            "discordId": ""
+        },
+        "juno18cq4kpcgyp3k5nelaq52mlwcfqk9v6dhs00ytt": {
+            "name": "aidenjeon",
+            "discordId": ""
+        },
+        "juno195hszm9c38q2fhk4xldvg06rpxjsad3rqg64m5": {
+            "name": "chidi",
+            "discordId": ""
+        },
+        "juno1a74c3ltj84u53wl3lmy0jgw64enqd76sqssxvz": {
+            "name": "yoditar",
+            "discordId": ""
+        },
+        "juno1arkzssy3e26n94fytclhwjp4mr4rzh36rwsvay": {
+            "name": "edicksonjga",
+            "discordId": ""
+        },
+        "juno1dgtmcp7jerprg3grdl6qg47sv394txfcevqfcn": {
+            "name": "dismad",
+            "discordId": ""
+        },
+        "juno1gl7hckknll0446dz08ftwnffuw2r9y2pdy2taa": {
+            "name": "mine_zkp",
+            "discordId": ""
+        },
+        "juno1h860nq7xmesv7wtlqvut2s0j2n2nj6kgjr3pzk": {
+            "name": "vito.zk",
+            "discordId": ""
+        },
+        "juno1j4mk48awm674a6rq7mrmk5sa2dnwfkdd8fdtap": {
+            "name": "iam_axtronaut",
+            "discordId": ""
+        },
+        "juno1lnedamfghyfv57kwncraaltqrw73xudy43x79h": {
+            "name": "robmarn",
+            "discordId": ""
+        },
+        "juno1mevzwa42r2vhqa3c0g3xvpakxsghnmuheydsvj": {
+            "name": "damnsquirrel",
+            "discordId": ""
+        },
+        "juno1rsawflrc68xnqxk24ul634k5ys8u0cf84le7sk": {
+            "name": "tecnopapapi",
+            "discordId": ""
+        },
+        "juno1tqs76f9jzgpxq5a6k88g6jrpsy54qh08c83g8r": {
+            "name": "_thekroy",
+            "discordId": ""
+        },
+        "juno1upd8c8hf7rzgjd9qsznrf6ptkuh9kaul7rvj0": {
+            "name": "_zolder",
+            "discordId": ""
+        },
+        "juno1uxfy6v06dpjhm58qzxkf7rua4mrs3rsmr05wrp": {
+            "name": "jameskatz",
+            "discordId": ""
+        },
+        "juno1vle7gqc9ytjecl220qldsmkks6czvvnhg2mzpw": {
+            "name": "diamondfu_lt",
+            "discordId": ""
+        },
+        "juno1vwm749frt2qweafed2egzyvkd9knwf7zmm5zvj": {
+            "name": "blakiat",
+            "discordId": ""
+        },
+        "juno1xte3hz7p533fhujq43nuvj3ae2cljfkxnjklpv": {
+            "name": "hardaeborla",
+            "discordId": ""
+        },
+        "juno1zyegrfva453l09k83v9xpsuflslhpdc05xypy6": {
+            "name": "gordonestv",
+            "discordId": ""
+        }
     }
 }

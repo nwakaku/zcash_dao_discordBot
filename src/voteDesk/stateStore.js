@@ -4,7 +4,7 @@ const path = require('node:path');
 class StateStore {
     constructor(filePath) {
         this.filePath = filePath;
-        this.data = { posts: {}, trackedProposals: {}, baselineProposals: {}, outagePosted: false };
+        this.data = { posts: {}, trackedProposals: {}, baselineProposals: {} };
     }
 
     async load() {
@@ -19,7 +19,6 @@ class StateStore {
                 baselineProposals: parsed.baselineProposals && typeof parsed.baselineProposals === 'object'
                     ? parsed.baselineProposals
                     : {},
-                outagePosted: Boolean(parsed.outagePosted),
             };
         } catch (error) {
             if (error.code !== 'ENOENT') throw error;
@@ -33,6 +32,10 @@ class StateStore {
 
     unavailableWasPosted(key) {
         return this.data.posts[key] === 'unavailable';
+    }
+
+    outageWasPosted(scope) {
+        return this.data.posts[`${scope}:outage`] === 'posted';
     }
 
     isTracked(key) {
@@ -50,9 +53,16 @@ class StateStore {
         await this.save();
     }
 
-    async setOutagePosted(value) {
-        this.data.outagePosted = value;
+    async markOutage(scope) {
+        this.data.posts[`${scope}:outage`] = 'posted';
         await this.save();
+    }
+
+    async clearOutage(scope) {
+        if (this.outageWasPosted(scope)) {
+            delete this.data.posts[`${scope}:outage`];
+            await this.save();
+        }
     }
 
     async save() {

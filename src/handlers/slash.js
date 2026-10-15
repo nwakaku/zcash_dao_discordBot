@@ -50,13 +50,19 @@ module.exports = async () => {
     }
 
     const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
-    try {
-        await rest.put(
-            Routes.applicationCommands(process.env.CLIENTID),
-            { body: slash }
-        );
-        console.log(colorize('magenta', 'SUCCESS: Slash commands registered successfully!'));
-    } catch (err) {
-        console.log(colorize('red', `ERROR: Failed to register commands: ${err}`));
-    }
+
+    // Register the command set in a single guild instantly (guild-scoped).
+    // Called for every guild on ready and for each new guild on join.
+    client.registerGuildCommands = async (guildId) => {
+        try {
+            await rest.put(
+                Routes.applicationGuildCommands(process.env.CLIENTID, guildId),
+                { body: slash }
+            );
+            return true;
+        } catch (err) {
+            console.log(colorize('red', `ERROR: Failed to register commands in guild ${guildId}: ${err}`));
+            return false;
+        }
+    };
 };

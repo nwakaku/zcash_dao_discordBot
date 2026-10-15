@@ -1,4 +1,5 @@
 const { calculateVoteMath, getFailureReason } = require('./math');
+const { NameResolver } = require('./names');
 
 function formatInteger(value) {
     return BigInt(value).toLocaleString('en-US');
@@ -7,6 +8,13 @@ function formatInteger(value) {
 function shortAddress(address) {
     if (address.length <= 16) return address;
     return `${address.slice(0, 8)}...${address.slice(-6)}`;
+}
+
+function createNameResolver(config) {
+    return new NameResolver({
+        members: config.members || {},
+        pfpkApiUrl: config.pfpkApiUrl || config.pfpkApiUrl || 'https://pfpk.daodao.zone',
+    });
 }
 
 function formatDuration(seconds) {
@@ -49,6 +57,8 @@ function formatAlert(proposalResponse, voters, block, config) {
     const math = calculateVoteMath(proposal);
     const expiresAt = expirationTimestamp(proposal.expiration, block.height, config.blockTimeSeconds, block.time.getTime());
     const remainingSeconds = Math.max(0, (expiresAt - block.time.getTime()) / 1000);
+    const nameResolver = createNameResolver(config);
+    const nonVoterNames = voters.map((addr) => nameResolver.resolveSync(addr)).join(', ') || 'None';
     const values = {
         title: proposal.title,
         proposal: `${proposalResponse.prefix}${proposalResponse.id}`,
@@ -66,7 +76,7 @@ function formatAlert(proposalResponse, voters, block, config) {
         yesNeeded: math.yesVotesStillNeeded === null ? 'unreachable' : formatInteger(math.yesVotesStillNeeded),
         timeRemaining: formatDuration(remainingSeconds),
         url: proposalUrl(config.daoUrl, proposalResponse),
-        nonVoters: voters.map(shortAddress).join(', ') || 'None',
+        nonVoters: nonVoterNames,
     };
     return { content: fillTemplate(config.templates.alert, values), nonVoters: voters };
 }
