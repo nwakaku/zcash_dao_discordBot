@@ -5,15 +5,12 @@
     "daoUrl": "https://daodao.zone/dao/juno1nktrulhakwm0n3wlyajpwxyg54n39xx4y8hdaqlty7mymf85vweq7m6t0y",
     "pollIntervalSeconds": 300,
     "blockTimeSeconds": 6,
-    "reminderHours": [
-        48,
-        24
-    ],
+    "reminderHours":  [48, 24],
     
   "templates": {
-    "alert": "🗳️ **{title}** (`{proposal}`)\n\n⏳ **Voting closes in {timeRemaining}**\n\n**Current votes**\n👍 Yes: {yes} · 👎 No: {no} · ➖ Abstain: {abstain}\n\n**What's needed?**\nVotes counted: {quorumComparison}\nSupport required: {threshold}\nMore Yes votes needed: **{yesNeeded}**\n\n**Members yet to vote:**\n{nonVoters}\n\n👉 **View proposal and vote:** www.proposallink",
+    "alert": "🗳️ **{title}** (`{proposal}`)\n\n⏳ **Voting closes in {timeRemaining}**\n\n**Current votes**\n👍 Yes: {yes} · 👎 No: {no} · ➖ Abstain: {abstain}\n\n**What's needed?**\nVotes counted: {quorumComparison}\nSupport required: {threshold}\nMore Yes votes needed: **{yesNeeded}**\n\n**Members yet to vote:**\n{nonVoters}\n\n👉 **View proposal and vote:**  <{url}>",
 
-    "closing": "📋 **Voting Closed — {title}** (`{proposal}`)\n\n**Outcome:** {outcome}\n\n**Final check**\nMinimum votes required: {quorumResult}\nSupport required: {supportResult}\n\n**What happened?**\n{reason}\nShortfall: {shortfall}\n\n🕒 Last updated: {asOf} UTC\n👉 **View proposal: ** <{url}>",
+    "closing": "📋 **Voting Closed — {title}** (`{proposal}`)\n\n**Outcome:** {outcome}\n\n**Final check**\nMinimum votes required: {quorumResult}\nSupport required: {supportResult}\n\n**What happened?**\n{reason}\nShortfall: {shortfall}\n\n🕒 Last updated: {asOf} UTC\n👉 **View proposal:** <{url}>",
 
     "unavailable": "⚠️ **Vote Desk: Data Unavailable**\n\nWe couldn't retrieve the latest voting information for `{proposal}`.\n\nNo outdated vote figures are being shown. The bot will try again shortly.\n\n🕒 Last checked: {asOf} UTC",
 
