@@ -1,0 +1,25 @@
+# Render Blueprint: Discord governance monitor (background worker)
+# Deploy via Dashboard > Blueprints > connect repo, or:
+# https://dashboard.render.com/blueprints
+
+services:
+  - type: worker
+    name: zcash-dao-bot
+    runtime: docker
+    plan: starter # Workers have no free tier; $7/mo (0.5 CPU / 512 MB)
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    numInstances: 1 # Must stay 1: local state files are not multi-instance safe
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: VOTEDESK_ENABLED
+        value: "true"
+      - key: TOKEN
+        sync: false # Set in Render Dashboard (Discord bot token)
+      - key: CLIENTID
+        sync: false # Set in Render Dashboard (Discord application ID)
+    disk:
+      name: votedesk-data
+      mountPath: /app/data # Persists data/vote-desk-state.json + vote-desk-targets.json
+      sizeGB: 1 # $0.25/mo

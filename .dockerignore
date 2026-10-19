@@ -1,0 +1,9 @@
+.env
+.git
+node_modules
+data
+test
+assets
+.vscode
+.github
+*.md
