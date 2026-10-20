@@ -2,6 +2,23 @@
 
 Read-only Discord governance monitoring for the ZecHub DAO on Juno. The Vote Desk reads DAO DAO proposal, voting, and CW4 group contracts; it never casts votes or submits chain transactions.
 
+## Rationale
+
+DAO DAO governance for ZecHub happens on-chain on Juno, but members live in Discord. Proposal deadlines and live tallies are easy to miss there, so people often learn a vote has closed only after the fact — and turnout suffers. The Vote Desk bridges that gap: it surfaces every open proposal's countdown, current counts, quorum and support requirements, and remaining non-voters directly in the server's governance channel, then posts a final outcome summary.
+
+The design follows four principles:
+
+- **Read-only by design.** The bot never casts votes or submits chain transactions, so it cannot move funds or influence outcomes. It is safe to hand over to DAO control.
+- **No noise.** Deduplication state guarantees exactly one reminder per interval per channel, manual posts don't disturb the schedule, and each server opts in to one channel of its choosing. There are no DMs and no targeted pings — only public, opt-in channel posts.
+- **Honest data.** Every post is refreshed from chain first; if a required query fails, the bot posts a data-unavailable notice instead of showing stale figures.
+- **Fail-safe.** A maintainer kill switch (`VOTEDESK_ENABLED=false`) stops all scheduled monitoring instantly.
+
+In one line: it raises DAO turnout by making voting deadlines and live tallies impossible to miss in Discord — without ever touching the chain or spamming members.
+
+Invite Live into Your Server - https://discord.com/oauth2/authorize?client_id=1560216690212470784 
+
+The sections below describe what it does and how to run it.
+
 ## What it does
 
 - Posts public updates in the configured governance channel at 48 and 24 hours before each open proposal expires.
@@ -61,3 +78,5 @@ The backtest compares calculated outcomes against every terminal proposal status
 - `test/voteDesk.test.js` covers the vote calculation, formatting, scheduled posting, manual posting, target storage, and per-channel deduplication.
 
 The original Discord.js event and command loader remains under `src/`. Its V2 component showcase commands are retained as examples but excluded from slash-command registration.
+
+Invite to Server - https://discord.com/oauth2/authorize?client_id=1560216690212470784 
